@@ -1,8 +1,8 @@
 import express, { Request, Response } from 'express';
 import { fetchJoke } from './jokesApi.js';
+import { config } from './config.js';
 
 const app = express();
-const PORT = 3000;
 
 app.get('/status', (req: Request, res: Response) => {
 	res.json({ status: 'OK' });
@@ -58,6 +58,6 @@ app.get('/api/jokes/:category', async (req: Request, res: Response) => {
 	}
 });
 
-app.listen(PORT, () => {
-	console.log(`Server running on http://localhost:${PORT}`);
+app.listen(config.port, () => {
+	console.log(`Server running on http://localhost:${config.port}`);
 });
