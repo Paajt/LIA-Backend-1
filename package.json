@@ -1,0 +1,25 @@
+{
+	"name": "lia-backend-1",
+	"version": "1.0.0",
+	"description": "Two API wrappers. 1: Nodejs + Express 2: Encore.ts",
+	"main": "index.js",
+	"scripts": {
+		"setup": "npm install && cd nodejs-express && npm install && cd ../encoreTs && npm install",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Paajt/LIA-Backend-1.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"type": "commonjs",
+	"bugs": {
+		"url": "https://github.com/Paajt/LIA-Backend-1/issues"
+	},
+	"homepage": "https://github.com/Paajt/LIA-Backend-1#readme",
+	"devDependencies": {
+		"concurrently": "^9.2.1"
+	}
+}
