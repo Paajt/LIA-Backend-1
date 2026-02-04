@@ -1,55 +1,64 @@
-import { Header, Gateway, APIError } from 'encore.dev/api';
+import { Header, Gateway } from 'encore.dev/api';
 import { authHandler } from 'encore.dev/auth';
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET =
 	'my-super-duper-topsecret-key-please-change-me-in-production';
 
-// AuthParams specifies the incoming request information
-// the auth handler is interested in. In this case it only
-// cares about requests that contain the `Authorization` header.
+const VALID_API_KEYS = new Set([
+	'secret-key-123',
+	'demo-key-456',
+	'test-key-789',
+]);
+
 interface AuthParams {
-	Authorization: Header<string>;
+	Bearer?: Header<string>;
+	'x-api-key'?: Header<string>;
 }
 
-// The AuthData specifies the information about the authenticated user
-// that the auth handler makes available.
 interface AuthData {
 	userID: string;
 	role: string;
+	authMethod: string;
 }
 
-// The auth handler itself.
 export const auth = authHandler<AuthParams, AuthData>(
 	async (params): Promise<AuthData> => {
-		// Get authorization header
-		const authHeader = params.Authorization;
-		if (!authHeader) {
-			throw APIError.unauthenticated('No token provided!');
+		// Prova API Key först
+		const apiKey = params['x-api-key'];
+		if (apiKey && VALID_API_KEYS.has(apiKey)) {
+			return {
+				userID: 'api-user',
+				role: 'api-key-user',
+				authMethod: 'API Key',
+			};
 		}
+
+		// Prova JWT
+		const authHeader = params.Bearer;
+		if (!authHeader) {
+			throw new Error('No authentication provided');
+		}
+
 		const token = authHeader.replace('Bearer ', '');
 
 		try {
-			// verify token
 			const decoded = jwt.verify(token, JWT_SECRET) as any;
-
-			// Return user data
 			return {
 				userID: decoded.user,
 				role: decoded.role,
+				authMethod: 'JWT',
 			};
 		} catch (error) {
-			throw new Error('Invalid or expired token');
+			throw new Error('Invalid authentication');
 		}
 	}
 );
 
-// Define the API Gateway that will execute the auth handler:
 export const gateway = new Gateway({
 	authHandler: auth,
 });
 
-// Helper function to generate tokens
 export function generateToken(user: string, role: string): string {
 	return jwt.sign({ user, role }, JWT_SECRET, { expiresIn: '24h' });
 }
