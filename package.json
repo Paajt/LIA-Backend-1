@@ -4,7 +4,7 @@
 	"description": "Two API wrappers. 1: Nodejs + Express 2: Encore.ts",
 	"main": "index.js",
 	"scripts": {
-		"setup": "npm install && cd nodejs-express && npm install && cd ../encoreTs && npm install",
+		"setup": "npm install && cd nodejs-express && npm install && cd ../encoreTs && cd /jokes-api && npm install",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"repository": {
