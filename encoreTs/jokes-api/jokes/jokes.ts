@@ -33,3 +33,22 @@ export const joke = api(
 		return { joke: [data.setup, data.delivery] };
 	}
 );
+
+export const jokeByCategory = api(
+	{ method: 'GET', path: '/jokes/:category', expose: true, auth: true },
+	async ({ category }: { category: string }): Promise<JokeResponse> => {
+		const response = await fetch(`https://v2.jokeapi.dev/joke/${category}`);
+
+		if (!response.ok) {
+			throw new Error('Failed to fetch joke!');
+		}
+
+		const data = (await response.json()) as JokeApiResponse;
+
+		if (data.type === 'single') {
+			return { joke: [data.joke] };
+		}
+
+		return { joke: [data.setup, data.delivery] };
+	}
+);
