@@ -16,7 +16,7 @@ type JokeResponse = {
 };
 
 export const joke = api(
-	{ method: 'GET', path: '/jokes' },
+	{ method: 'GET', path: '/jokes', expose: true, auth: true },
 	async (): Promise<JokeResponse> => {
 		const response = await fetch('https://v2.jokeapi.dev/joke/any');
 
