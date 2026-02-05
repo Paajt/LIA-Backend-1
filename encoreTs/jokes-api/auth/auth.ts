@@ -1,4 +1,4 @@
-import { Header, Gateway } from 'encore.dev/api';
+import { Header, Gateway, APIError } from 'encore.dev/api';
 import { authHandler } from 'encore.dev/auth';
 import jwt from 'jsonwebtoken';
 
@@ -26,32 +26,35 @@ export const auth = authHandler<AuthParams, AuthData>(
 	async (params): Promise<AuthData> => {
 		// Prova API Key först
 		const apiKey = params['x-api-key'];
-		if (apiKey && VALID_API_KEYS.has(apiKey)) {
-			return {
-				userID: 'api-user',
-				role: 'api-key-user',
-				authMethod: 'API Key',
-			};
+		if (apiKey) {
+			if (VALID_API_KEYS.has(apiKey)) {
+				return {
+					userID: 'api-user',
+					role: 'api-key-user',
+					authMethod: 'API key',
+				};
+			}
+
+			throw APIError.unauthenticated('Invalid API key');
 		}
 
 		// Prova JWT
 		const authHeader = params.Bearer;
-		if (!authHeader) {
-			throw new Error('No authentication provided');
+		if (authHeader) {
+			const token = authHeader.replace('Bearer ', '');
+			try {
+				const decoded = jwt.verify(token, JWT_SECRET) as any;
+				return {
+					userID: decoded.user,
+					role: decoded.role,
+					authMethod: 'JWT',
+				};
+			} catch (error) {
+				throw APIError.unauthenticated('Invalid or expired token');
+			}
 		}
 
-		const token = authHeader.replace('Bearer ', '');
-
-		try {
-			const decoded = jwt.verify(token, JWT_SECRET) as any;
-			return {
-				userID: decoded.user,
-				role: decoded.role,
-				authMethod: 'JWT',
-			};
-		} catch (error) {
-			throw new Error('Invalid authentication');
-		}
+		throw APIError.unauthenticated('Invalid credentials');
 	}
 );
 
